@@ -12,19 +12,21 @@ contract oneWinsAll {
     event awardpaid(address _winner, uint64 _ticketid, uint64 _amount);
     // Events to be watched.
  
-    uint64 public price = 0.05 ether; // A fixed price to join the game.
-    uint64 public maxid = 2; // The max amount of tickets that can be sold out.
+    uint64 public price = 5 ether; // A fixed price to join the game.
+    uint64 public nlimit = 2; // The max amount of tickets that can be sold out.
 
     uint64 public sold;     // Records the number of tickets sold.
     mapping(uint64 => address) players;
 
-    constructor() public payable {
+    constructor(uint64 _price, uint64 _nlimit) public payable {
         sold = 0;
+        price = _price;
+        nlimit = _nlimit;
     }
 
     modifier allsold() {
      // Defines a state for the functions below that requires all tickets to be sold.
-        require(sold == maxid);
+        require(sold == nlimit);
         _;
     }
 
@@ -35,18 +37,14 @@ contract oneWinsAll {
 
     function join() payable public returns (bool) {
         require(msg.value == price);
-        require(sold < maxid);
-        // require(_ticket >= 1 && _ticket <= maxid);
-        // Bugs, you don't know which ID is used.
+        require(sold < nlimit);
         
         // Conditions for the player to join successfully and legally.
-
-        // address user = msg.sender;
         sold += 1;
         players[sold] = msg.sender;
         emit purchased(msg.sender, sold);
 
-        if (sold == maxid) {
+        if (sold == nlimit) {
          // The number of participants reaches the upper bound, time to send the award.
             sendrwrd();
         }
@@ -55,18 +53,17 @@ contract oneWinsAll {
 
     function sendrwrd() public allsold payable returns (address) {
         uint64 winnerticket = picker();
-        // Prevent locked funds by sending to bad address
         sold = 0;
         // Prevent re-entrancy attack by removing all arguments.
-        players[winnerticket].transfer(maxid * price);
-        emit awardpaid(players[winnerticket], winnerticket, maxid * price);
+        players[winnerticket].transfer(nlimit * price);
+        emit awardpaid(players[winnerticket], winnerticket, nlimit * price);
         return players[winnerticket];
     }
 
     function picker() public view allsold returns (uint64) {
         bytes memory entropy = abi.encodePacked(block.timestamp, block.number);
         bytes32 hash = sha256(entropy);
-        return uint64(hash) % (maxid-1) + 1;
+        return uint64(hash) % (nlimit-1) + 1;
     }
 
 }

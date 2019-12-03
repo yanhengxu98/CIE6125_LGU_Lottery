@@ -9,8 +9,8 @@ contract rightAway {
 	event purchased(address indexed _user, uint64 _guess);
 	event delivered(address indexed _user, uint64 _guess, uint64 _wincode, bool _win);
 
-	uint128 public price   =  5 wei;
-	uint128 public award   = 50 wei;
+	uint128 public price   =  5 ether;
+	uint128 public award;
 	uint64 public minguess =  0;
 	uint64 public maxguess = 20; // Range of the guess.
 	// Parameters that won't be altered.
@@ -21,11 +21,14 @@ contract rightAway {
 	bool public win;
 	// Arguments, will be cleared.
 
-	constructor() public {
+	constructor(uint128 _price, uint64 _minguess, uint64 _maxguess) public {
 		user = msg.sender;
 		join = false;
 		checked = false;
 		win = false;
+		price = _price;
+		minguess = _minguess;
+		maxguess = _maxguess;
 	}
 
 	modifier joined() {

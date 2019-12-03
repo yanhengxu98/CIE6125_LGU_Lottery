@@ -3,11 +3,11 @@ import { Grid, Button, Typography, TextField, Paper, CircularProgress, MenuItem,
 import { makeStyles } from '@material-ui/core/styles';
 import { Link } from '../../routes';
 import web3 from '../../libs/web3';
-import ProjectList from '../../libs/projectList';
+import ProbLottery from '../../libs/probLottery';
 import withRoot from '../../libs/withRoot';
 import Layout from '../../components/Layout';
 
-class ProjectCreate extends React.Component {
+class LotteryInitialization extends React.Component {
   constructor(props) {
     super(props);
 
@@ -21,7 +21,7 @@ class ProjectCreate extends React.Component {
       loading: false,
     };
 
-    this.onSubmit = this.createProject.bind(this);
+    this.onSubmit = this.createLottery.bind(this);
   }
 
   getInputHandler(key) {
@@ -31,7 +31,7 @@ class ProjectCreate extends React.Component {
     };
   }
 
-  async createProject() {
+  async createLottery() {
     const { description, minInvest, maxInvest, goal } = this.state;
     console.log(this.state);
 
@@ -64,8 +64,8 @@ class ProjectCreate extends React.Component {
       const owner = accounts[0];
 
       // 创建项目
-      const result = await ProjectList.methods
-        .createProject(description, minInvestInWei, maxInvestInWei, goalInWei)
+      const result = await ProbLottery.methods
+        .createLottery( description, minInvest, maxInvest, goal )
         .send({ from: owner, gas: '5000000' });
 
       this.setState({ errmsg: '项目创建成功' });
@@ -155,4 +155,4 @@ class ProjectCreate extends React.Component {
   }
 }
 
-export default withRoot(ProjectCreate);
+export default withRoot(LotteryInitialization);

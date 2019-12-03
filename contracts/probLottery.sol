@@ -12,20 +12,31 @@ contract probLottery {
     event awardpaid(address _winner, uint64 _ticketid, uint64 _amount);
     // Events to be watched.
  
-    uint64 public single= 500 wei; // A fixed single to join the game.
-    uint64 public maxid = 2; // The max amount of tickets that can be sold out.
+    uint64 public single = 5 ether; // A fixed single to join the game.
+    uint64 public nlimit =25; // The max amount of tickets that can be sold out.
+    uint64 public minbid = 1;
+    uint64 public maxbid =10;
 
-    uint8 public sold;     // Records the number of tickets sold.
+    uint8 public sold;       // Records the number of tickets sold.
     uint8 [] prob;
     mapping(uint64 => address) players;
+    // mapping(address => uint64) playerIndex;
+    // mapping(address => bool) votes;
+    // uint64 voterCount;
+    bool sent = false;
 
+    // constructor(uint64 _single, uint64 _minbid, uint64 _maxbid) public payable {
     constructor() public payable {
         sold = 0;
+        // voterCount = 0;
+        // single = _single;
+        // minbid = _minbid;
+        // maxbid = _maxbid;
     }
 
     modifier allsold() {
      // Defines a state for the functions below that requires all tickets to be sold.
-        require(sold == maxid);
+        require(sold == nlimit);
         _;
     }
 
@@ -36,7 +47,8 @@ contract probLottery {
 
     function join() payable public returns (bool) {
         require(msg.value % single == 0 && msg.value != 0);
-        require(sold < maxid);
+        require(msg.value/single >= minbid && msg.value/single <= maxbid );
+        require(sold < nlimit);
         // Conditions for the player to join successfully and legally.
 
         sold += 1;
@@ -46,7 +58,7 @@ contract probLottery {
         }
         emit purchased(msg.sender, sold);
 
-        if (sold == maxid) {
+        if (sold == nlimit) {
          // The number of participants reaches the upper bound, time to send the award.
             sendrwrd();
         }
@@ -61,6 +73,7 @@ contract probLottery {
         // Prevent re-entrancy attack by removing all arguments.
         players[winnerticket].transfer(multiplier * single);
         emit awardpaid(players[winnerticket], winnerticket, multiplier * single);
+        sent = true;
         return players[winnerticket];
     }
 
@@ -70,4 +83,20 @@ contract probLottery {
         return uint64(hash) % (uint8(prob.length)-1) + 1;
     }
 
+    // function sendinAdvance() payable public void () {
+    // 	require(playerIndex[msg.sender]);
+    // 	require(!votes[msg.sender]);
+
+    // 	votes[msg.sender] = true;
+    // 	voterCount += 1;
+
+    // 	if (voterCount == sold) {
+    // 		sendrwrd();
+    // 	}
+    // }
+
+    function kill() public {
+    	require(sent == true);
+    	selfdestruct(this);
+    }
 }

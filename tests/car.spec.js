@@ -7,7 +7,7 @@ const Web3 = require('web3');
 const contractPath = path.resolve(__dirname, '../compiled/Car.json');
 const { interface, bytecode } = require(contractPath);
 
-2. 配置 provider
+// 2. 配置 provider
 const web3 = new Web3(ganache.provider());
 
 let accounts;

@@ -3,18 +3,17 @@ import { Grid, Button, Typography, TextField, Paper, CircularProgress } from '@m
 
 import { Router } from '../../../routes';
 import web3 from '../../../libs/web3';
-import Project from '../../../libs/project';
+import ProbLottery from '../../../libs/probLottery';
 import withRoot from '../../../libs/withRoot';
 import Layout from '../../../components/Layout';
 
 class PaymentCreate extends React.Component {
   static async getInitialProps({ query }) {
-    const contract = Project(query.address);
-
-    const summary = await contract.methods.getSummary().call();
-    const description = summary[0];
-    const balance = summary[4];
-    const owner = summary[7];
+    const contract = ProbLottery(query.address);
+    
+    const description = ProbLottery.methods.description().call();
+    const balance = ProbLottery.methods.balance().call();
+    const owner = ProbLottery.methods.owner().call();
 
     return { project: { address: query.address, description, owner, balance } };
   }
@@ -24,8 +23,8 @@ class PaymentCreate extends React.Component {
 
     this.state = {
       description: '',
-      amount: '0.5', // web3.utils.fromWei(project.balance, 'ether')
-      receiver: '0xd7636aBF54A7cD71B3B12094E4a08d613C47109D', // 
+      amount: '', // web3.utils.fromWei(project.balance, 'ether')
+      receiver: '', // 
       errmsg: '',
       loading: false,
     };
@@ -41,7 +40,9 @@ class PaymentCreate extends React.Component {
   }
 
   async createPayment() {
-    const { description, amount, receiver } = this.state;
+    const { description } = this.state;
+    const amount = ProbLottery.methods.multiplier().call() * ProbLottery.methods.single().call();
+    const receiver = ProbLottery.methods.sendrwrd().call();
     console.log(this.state);
 
     // 字段合规检查
@@ -49,10 +50,10 @@ class PaymentCreate extends React.Component {
       return this.setState({ errmsg: 'You must entey the reason for early draw!' });
     }
     if (amount <= 0) {
-      return this.setState({ errmsg: '支出金额必须大于0' });
+      return this.setState({ errmsg: 'Invalid amount to be sent!' });
     }
     if (!web3.utils.isAddress(receiver)) {
-      return this.setState({ errmsg: '收款人账户地址不正确' });
+      return this.setState({ errmsg: 'Invalid address of the receiver!' });
     }
 
     const amountInWei = web3.utils.toWei(amount, 'ether');
@@ -70,7 +71,7 @@ class PaymentCreate extends React.Component {
       }
 
       // 创建项目
-      const contract = Project(this.props.project.address);
+      const contract = ProbLottery(this.props.project.address);
       const result = await contract.methods
         .createPayment(description, amountInWei, receiver)
         .send({ from: sender, gas: '5000000' });
