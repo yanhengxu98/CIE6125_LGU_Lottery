@@ -32,11 +32,13 @@ A naive implemented Ethereum smart contract based lottery DApp. Based on:
 
 * StartUp an Lottery:
 
-![startup](/Users/leomactavish/cie6125/testsamplecode/ethereum-contract-workflow/images/startup.png)
+![startup](./images/startup.png)
 
 * Join a Lottery:
 
-![join](/Users/leomactavish/cie6125/testsamplecode/ethereum-contract-workflow/images/Join.png)
+![join](./images/Join.png)
+
+
 
 
 
